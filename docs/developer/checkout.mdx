@@ -1,6 +1,6 @@
 ---
 title: Working with Checkout
-sidebar_label: Checkout
+sidebar_label: Cart and Checkout
 ---
 
 ## Introduction
@@ -10,6 +10,11 @@ Below is a description of a checkout process. We assume that at this stage you h
 The below process describes the key milestones in the checkout process flow in Saleor. There are also additional steps that may occur along the way; however, the purpose of this instruction is to deliver a base reference for the user to work with.
 
 The code snippets included in this section may be run in [Playground](getting-started/graphql) or your preferred HTTP client.
+
+### Why there is no cart model?
+
+Unlike most of other ecommerce platforms, Saleor has no separate model for a cart. Instead, we decited to merge it with checkout. Main reason was providing additional address context, required to calculate taxes in different countries.
+Checkout provides interface for usual cart operations like managing adding products or promo codes. 
 
 ## Multiple channels and checkout
 
@@ -163,6 +168,88 @@ We get a newly created checkout object for which we return the ID, total price, 
         ]
       },
       "checkoutErrors": []
+    }
+  }
+}
+```
+
+## Managing items
+
+### Adding a product
+
+[`checkoutLinesAdd`](developer/api-reference/mutations/checkout-lines-add.mdx)
+
+```graphql
+mutation {
+  checkoutLinesAdd(
+    checkoutId: "Q2hlY2tvdXQ6MzQwNTFhMDAtNTI3NC00OWEwLWE3YmEtMTE0NjUwMWY3MzM3"
+    lines: [{ quantity: 1, variantId: "UHJvZHVjdFZhcmlhbnQ6Mjc0" }]
+  ) {
+    checkout {
+      lines{
+        variant{
+          name
+        }
+        quantity
+      }
+      totalPrice {
+        gross {
+          currency
+          amount
+        }
+      }
+    }
+  }
+}
+```
+
+Response contains updated checkout contents:
+```json
+{
+  "data": {
+    "checkoutLinesAdd": {
+      "checkout": {
+        "lines": [
+          {
+            "variant": {
+              "name": "XL"
+            },
+            "quantity": 1
+          }
+        ],
+        "totalPrice": {
+          "gross": {
+            "currency": "USD",
+            "amount": 5
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+If variant is already added, its quantity will be increased. Running prevoius mutation twice will result in checkout with one line and quantity set to 2:
+```json
+{
+  "data": {
+    "checkoutLinesAdd": {
+      "checkout": {
+        "lines": [
+          {
+            "variant": {
+              "name": "XL"
+            },
+            "quantity": 2
+          }
+        ],
+        "totalPrice": {
+          "gross": {
+            "currency": "USD",
+            "amount": 10
+          }
+        }
+      }
     }
   }
 }
