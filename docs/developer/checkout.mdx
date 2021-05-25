@@ -11,10 +11,10 @@ The below process describes the key milestones in the checkout process flow in S
 
 The code snippets included in this section may be run in [Playground](getting-started/graphql) or your preferred HTTP client.
 
-### Why there is no cart model?
+### Why is there no cart model?
 
-Unlike most of other ecommerce platforms, Saleor has no separate model for a cart. Instead, we decited to merge it with checkout. Main reason was providing additional address context, required to calculate taxes in different countries.
-Checkout provides interface for usual cart operations like managing adding products or promo codes. 
+Saleor has no separate object type for shopping carts and baskets. We wanted the same features—like discounts, vouchers, address-specific taxes, and shipping estimates—to be available in the cart and the checkout, so we've decided to use the same object type for both.
+Checkout provides the interface for usual cart operations like adding products or promo codes. It can also be completed in almost any order, for example, saving a billing address before adding any items. 
 
 ## Multiple channels and checkout
 
@@ -203,7 +203,7 @@ mutation {
 }
 ```
 
-Response contains updated checkout contents:
+The response contains the updated checkout object:
 ```json
 {
   "data": {
@@ -229,7 +229,7 @@ Response contains updated checkout contents:
 }
 ```
 
-If variant is already added, its quantity will be increased. Running prevoius mutation twice will result in checkout with one line and quantity set to 2:
+If the variant is already added to the checkout, Saleor will increase the corresponding line's quantity. Running the previous mutation twice will result in a checkout object with one line and the quantity set to 2:
 ```json
 {
   "data": {
